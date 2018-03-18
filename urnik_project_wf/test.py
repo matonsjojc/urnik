@@ -26,17 +26,16 @@ def check_if_candidates(dan, tehniki):
         if dan.cifra in val.preference["hoce"]:
             kandidati.append(val)
     sortirani_kandidati = sorted(kandidati, key=lambda tehnik : tehnik.tocke["hoce_tmp"], reverse=True)
-    print("sortirani kandidati, ki hocejo delati ta dan: ", [s.name for s in sortirani_kandidati])
+    #print("funkcija 'check_if_candidates', sortirani kandidati, ki hocejo delati ta dan: ", [s.name for s in sortirani_kandidati])
     return sortirani_kandidati
 
 def naredi_urnik(mesec, tehniki):
     #
-    """urnik = {}
-    temp_stanje = {}
+    """
     for dan in mesec:
         tehniki = sample(tehniki, k=len(tehniki)) #premesa vrstni red tehnikov, trenutno nakljucno
     """
-    print("delam urnik...")
+    print("funkcija naredi_urnik...")
     st_dni = len(mesec)
     print("st. dni: ", st_dni)
 
@@ -48,14 +47,30 @@ def naredi_urnik(mesec, tehniki):
         print("ime: ", t.name, ", tmp_tocke: ", t.tocke)
 
     dnevi_za_zafilat = [] #sem gredo dnevi, ko lab dela in ni dolocenega tehnika
-    #for dan in mesec:
+    for dan in mesec:
     #preveri ce je lab odprt:
-        #if dan.laboratorij_odprt:
-    #        print("kle sm ostal, 59")
+        if dan.laboratorij_odprt:
+            print("\n", dan.cifra, " - dan, laboratorij je odprt")
             #preveri, ce je se prosto mesto za tehnika:
-    #        if not dan.tehnik_dela:
+            if not dan.tehnik_dela:
                 #doloci najustreznejsega tehnika s seznama prostovoljcev za ta dan
-    #                       pass
+                prostovoljci = check_if_candidates(dan, tehniki)
+                print("prostovoljci: ", [p.name for p in prostovoljci])
+                if not prostovoljci:
+                    #nobenega prostovoljca/ze dolocenega za delo, ta dan bo treba dnevi_za_zafilat
+                    dnevi_za_zafilat.append(dan)
+                else:
+                    #doloci prvega prostovoljca s seznama
+                    dan.tehnik_dela = prostovoljci[0]
+                    print("prostovoljec = ", dan.tehnik_dela)
+                    #ostalim prilagodi hoce_tmp tocke
+
+
+
+
+
+        print("dnevi za zafilat: ", [d.cifra for d in dnevi_za_zafilat])
+    print("konec f. naredi_urnik")
 
 class Tehnik: #ima ime, preference (max/min/zeleno stevilo nocnih; dneve, ko ne more; dneve, ko bi; zaporedne da/ne)
 
@@ -87,13 +102,13 @@ class Tehnik: #ima ime, preference (max/min/zeleno stevilo nocnih; dneve, ko ne 
     def add_hoce(self, hoce_str): #dnevi, ko bi rad delal - prejme string, vrne list
         hoce_list_stringov = hoce_str.split(sep=",") #iz str naredi list stringov
         hoce_list = [int(day) for day in hoce_list_stringov] #tole bo list integerjev...
-        print("hoce_list", hoce_list, "len: ", len(hoce_list))
+        #print("hoce_list", hoce_list, "len: ", len(hoce_list))
         self.preference["hoce"] = hoce_list
 
     def add_noce(self, noce_str): #dnevi, ko noce/ne more delati
         noce_list_stringov = noce_str.split(sep=",")
         noce_list = [(int(day)) for day in noce_list_stringov]
-        print("noce_list", noce_list, "len: ", len(noce_list))
+        #print("noce_list", noce_list, "len: ", len(noce_list))
         self.preference["noce"] = noce_list
 
     def add_zaporedne(self, zaporedne): #koliko zaporednih
@@ -112,15 +127,14 @@ class Tehnik: #ima ime, preference (max/min/zeleno stevilo nocnih; dneve, ko ne 
 
 class Dan:
 
-    laboratorij_odprt = True
     #to_do: __init__, __str__, povezi z Date objectom ali podobnim...
     def __init__(self):
         self.cifra = None #integer 1-31, kateri dan je... spremeni v Date object enkrat
-        self.ne_bi_delal = [] #tehniki, ki ne bi delali ta dan
+        self.ne_bi_delal = None #tehniki, ki ne bi delali ta dan
         self.rad_bi_delal = [] #tehniki, ki bi delali ta dan
         self.tehnik_dela = None #ta tehnik dela
         self.vsote_tock = [0, 0, 0] #hoce/noce/optimalno
-        #self.laboratorij_odprt = laboratorij_odprt
+        self.laboratorij_odprt = True
 
     def __str__(self):
         return str(self.cifra)
@@ -183,13 +197,12 @@ print("tehniki iz csv: ", tehniki)
 #naredi mesec - list Dni
 mesec = []
 for dan in range(1,31):
-    d = Dan
+    d = Dan()
     d.cifra = dan
-    #d.laboratorij_odprt = True
-    print("tole je 'laboratorij_odprt': ", d.laboratorij_odprt)
+    if dan == 1:
+        d.tehnik_dela = "fsfs"
     mesec.append(d)
-for dan in mesec:
-    print(dan.laboratorij_odprt)
+
 
 ####
 #testni dan:
@@ -202,6 +215,7 @@ print(testni_dan.cifra)
 
 print("---------------")
 naredi_urnik(mesec, tehniki)
+print("mesec: ", [dan.cifra for dan in mesec])
 kan = check_if_candidates(testni_dan, tehniki)
 print("tile lahko delajo na testni_dan: ", kan)
 print("-----test-sort---")
