@@ -40,8 +40,3 @@ d = Dan
 d.cifra = 0
 print(d.cifra)
 """
-a = [1, 2, 3, 4]
-for l in range(1,len(a)):
-    print(a[l])
-
-print(range(0, 10))
